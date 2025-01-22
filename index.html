@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3x3 Grid Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      gap: 10px;
+      justify-content: center;
+      margin: 50px auto;
+    }
+    .grid button {
+      width: 100px;
+      height: 100px;
+      font-size: 24px;
+      cursor: pointer;
+      border: none;
+      outline: none;
+      transition: background-color 0.3s;
+    }
+    .grid button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+    #message {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+    #restart {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>3x3 Grid Game</h1>
+  <div class="grid" id="grid"></div>
+  <div id="message">Click a button to start!</div>
+  <button id="restart" onclick="restartGame()">Restart Game</button>
+
+  <script>
+    const gridSize = 3;
+    const grid = document.getElementById('grid');
+    const message = document.getElementById('message');
+    const restartButton = document.getElementById('restart');
+
+    let lastClickedIndex = null;
+
+    // Define colors for numbers 0-8
+    const colors = [
+      '#FF0000', // 0
+      '#909090', // 1
+      '#3357FF', // 2
+      '#FF33A1', // 3
+      '#F3FF33', // 4
+      '#33FFF6', // 5
+      '#A133FF', // 6
+      '#FF8C33', // 7
+      '#25F208'  // 8
+    ];
+
+    // Create grid and initialize buttons with random numbers
+    let buttons = [];
+    function createGrid() {
+      grid.innerHTML = '';
+      buttons = [];
+      for (let i = 0; i < gridSize * gridSize; i++) {
+        const button = document.createElement('button');
+        const randomNumber = Math.floor(Math.random() * 9); // Random number between 0-8
+        button.textContent = randomNumber;
+        button.style.backgroundColor = colors[randomNumber];
+        button.addEventListener('click', () => handleClick(i));
+        grid.appendChild(button);
+        buttons.push(button);
+      }
+      lastClickedIndex = null;
+      restartButton.style.display = 'none';
+    }
+
+    function handleClick(index) {
+      if (index === lastClickedIndex) {
+        message.textContent = "You can't click the same button twice in a row!";
+        return;
+      }
+
+      // Disable the last clicked button and reset its opacity
+      if (lastClickedIndex !== null) {
+        buttons[lastClickedIndex].disabled = false;
+		buttons[lastClickedIndex].style.borderColor = 'white';
+		buttons[lastClickedIndex].style.borderStyle = 'solid';
+		buttons[lastClickedIndex].style.borderWidth = '0px';
+        //buttons[lastClickedIndex].style.opacity = 1;
+      }
+
+      // Update button number cyclically
+      const button = buttons[index];
+      let number = parseInt(button.textContent, 10);
+      number = (number + 1) % 9;
+      button.textContent = number;
+      button.style.backgroundColor = colors[number];
+
+      // Disable and tint the current button
+      button.disabled = true;
+      button.style.borderColor = 'black';
+	  button.style.borderStyle = 'solid';
+	  button.style.borderWidth = '2px';
+	  //"2px solid black;";
+
+      // Update last clicked index
+      lastClickedIndex = index;
+
+      // Check for win condition
+      if (checkWin()) {
+        message.textContent = 'Congratulations! You won!';
+        restartButton.style.display = 'inline-block';
+      } else {
+        message.textContent = 'Keep going!';
+      }
+    }
+
+    function checkWin() {
+      const uniqueNumbers = new Set(buttons.map(button => button.textContent));
+      return uniqueNumbers.size === 9; // Win if all numbers are unique
+    }
+
+    function restartGame() {
+      createGrid();
+      message.textContent = 'Click a button to start!';
+    }
+
+    // Initialize the grid on page load
+    createGrid();
+  </script>
+</body>
+</html>
